@@ -1,0 +1,49 @@
+name: Deploy Odoo 19
+
+on:
+  push:
+    branches: [ odoo-19 ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to server
+    runs-on: self-hosted
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare
+        run: |
+          chmod +x entrypoint.sh
+          mkdir -p postgresql addons
+
+      - name: Restart containers
+        run: |
+          docker compose down
+          docker compose up -d
+
+      - name: Wait for Odoo
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:10019/web/login > /dev/null; then
+              echo "Odoo is up"
+              exit 0
+            fi
+            echo "waiting... ($i)"
+            sleep 5
+          done
+          exit 1
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail 100
+
+      - name: Status
+        run: docker compose ps
