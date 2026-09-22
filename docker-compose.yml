@@ -24,6 +24,7 @@ services:
       - USER=odoo
       - PASSWORD=odoo19@2025
       - PIP_BREAK_SYSTEM_PACKAGES=1
+      - PYTHONDONTWRITEBYTECODE=1
     volumes:
       - ./entrypoint.sh:/entrypoint.sh
       - ./addons:/mnt/extra-addons

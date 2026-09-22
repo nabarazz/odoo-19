@@ -1,4 +1,8 @@
 postgresql/
+odoo-data/
+config/
+__pycache__/
+*.pyc
 etc/odoo-server.log*
 etc/addons/
 etc/sessions/
