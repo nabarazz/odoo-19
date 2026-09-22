@@ -5,15 +5,20 @@ on:
     branches: [ odoo-19 ]
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}
-  cancel-in-progress: false
-
 jobs:
   deploy:
-    name: Deploy to server
-    runs-on: self-hosted
+    name: Deploy to ${{ matrix.server }}
+    runs-on: [self-hosted, "${{ matrix.server }}"]
     timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        server: [odoo-server-1, odoo-server-2]
+
+    concurrency:
+      group: deploy-${{ matrix.server }}
+      cancel-in-progress: false
 
     steps:
       - name: Checkout
@@ -46,4 +51,5 @@ jobs:
         run: docker compose logs --tail 100
 
       - name: Status
+        if: always()
         run: docker compose ps
